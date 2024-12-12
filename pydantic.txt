@@ -1,0 +1,261 @@
+what is pydantic what are it uses
+Pydantic is a data validation and settings management library for Python, built on Python type annotations. It's widely used for validating data in web APIs, data processing, and other applications where data integrity is crucial.
+
+
+from pydantic import BaseModel,ValidationError,Field
+from typing import List
+from enum import Enum
+import json
+
+class Gender(str,Enum):
+    Male="Male",
+    Female="Female"
+
+class Person(BaseModel):
+    username:str=Field(default=None,max_length=18,min_length=2)
+    email:str=Field(default=None,max_length=20)
+    age:int=Field(lt=60,gt=18)
+    friends:List[str]=[]
+    gender:Gender
+    
+    
+data={
+    "username":"test",
+    "email":"test@gmail.com",
+    "age":20,
+    "friends":["testuser"],
+    "gender":Gender.Male
+}
+try:
+    new_person=Person(**data)
+    schema=new_person.schema()
+    print(json.dumps(schema,indent=4))
+    
+except ValidationError as e:
+    print(e.json())
+	
+
+
+what is docker image 
+
+A Docker image is a lightweight, standalone, and executable package that includes everything needed to run a piece of software, including the code, runtime, libraries, environment variables, and configuration files.
+
+types of docker images
+
+1. Official Images
+Official images are curated and maintained by Docker, Inc. They are generally well-documented, trusted, and tested for quality and security. Examples include images for popular software like Ubuntu, Python, Nginx, MySQL, and Node.js.
+
+Examples:
+
+python:3.8-slim
+
+nginx:latest
+
+mysql:8.0
+
+2. Base Images
+Base images provide a minimal environment for running applications. They usually include just enough of the operating system to function. Base images serve as the foundation for other images.
+
+Examples:
+
+alpine:latest
+
+debian:latest
+
+3. Application Images
+These images are created by users or organizations to package their applications along with their dependencies. Application images are often built on top of base images or official images.
+
+Examples:
+
+my-python-app:latest
+
+my-web-server:v1
+
+4. Builder Images
+Builder images are used in multi-stage builds to compile and assemble applications. These images contain development tools and dependencies needed during the build process but are not included in the final image.
+
+Example:
+
+Dockerfile
+# Builder stage
+FROM golang:1.16 as builder
+WORKDIR /app
+COPY . .
+RUN go build -o myapp .
+
+# Final stage
+FROM alpine:latest
+COPY --from=builder /app/myapp /myapp
+CMD ["/myapp"]
+5. Custom Images
+Custom images are created by users for specific purposes. These can be highly specialized and tailored to specific needs, such as including particular configurations, tools, or software versions.
+
+6. Public Images
+Public images are available on public repositories like Docker Hub. They can be used by anyone and are often created and shared by the community.
+
+7. Private Images
+Private images are stored in private repositories and are restricted to specific users or organizations. They are used for proprietary or sensitive applications.
+
+
+in which situation which image we have to use
+
+1. Base Images
+Situation: Minimal Environment
+Use When: You need a minimal environment to build a customized application from scratch.
+
+Examples: alpine:latest, debian:latest
+
+Why: These images provide a lightweight and bare-bones foundation, reducing the attack surface and improving security.
+
+2. Official Images
+Situation: Standard Software Setup
+Use When: You want a standard setup of popular software with trusted, well-maintained configurations.
+
+Examples: nginx:latest, python:3.8-slim, mysql:8.0
+
+Why: Official images are maintained by Docker and the community, ensuring they are secure and up-to-date.
+
+3. Application Images
+Situation: Deploying Your Application
+Use When: You need to package your application along with its dependencies.
+
+Examples: Custom-built images using your Dockerfile, e.g., my-python-app:latest
+
+Why: These images include your application's code and all its dependencies, ensuring consistency across different environments.
+
+4. Builder Images
+Situation: Building Complex Applications
+Use When: You are building complex applications that require multiple stages for compiling and assembling.
+
+Examples: Multi-stage builds using golang:1.16 for building and alpine:latest for the final image.
+
+Why: Builder images allow you to use a different image for the build process and the final runtime, optimizing the final image size and security.
+
+5. Public Images
+Situation: Community Tools and Services
+Use When: You need community-contributed tools and services.
+
+Examples: Images from Docker Hub that are not official, but widely used and supported by the community.
+
+Why: Public images provide a variety of tools and services that may not be available as official images.
+
+6. Private Images
+Situation: Proprietary or Sensitive Applications
+Use When: You are deploying proprietary or sensitive applications that should not be publicly accessible.
+
+Examples: Images stored in private Docker registries like JFrog Artifactory, GitHub Packages.
+
+Why: Private images ensure that your proprietary applications are secure and accessible only to authorized users.
+
+7. Multi-Architecture Images
+Situation: Cross-Platform Support
+Use When: You need your application to run on different CPU architectures (e.g., amd64, arm64).
+
+Examples: Images that support multiple architectures using Docker manifests.
+
+Why: Multi-architecture images ensure that your application can run on a variety of hardware platforms without modification.
+
+Practical Example Scenarios
+Web Server: Use nginx:latest for a reliable web server setup.
+
+Python Application: Use python:3.8-slim for a lightweight Python runtime.
+
+Data Processing: Use spark:latest from the official Apache Spark repository for big data processing.
+
+CI/CD Pipeline: Use multi-stage builds to compile your application with golang:1.16 and deploy it using alpine:latest for a smaller, production-ready image.
+
+
+What is there in a docker file?
+
+what are the components present in docker file
+A Dockerfile is a script that contains a set of instructions for Docker to build an image. Each instruction in a Dockerfile creates a layer in the image. Here's a breakdown of the main components you might find in a Dockerfile:
+
+1. FROM
+Specifies the base image to use for the build process. Every Dockerfile must start with a FROM instruction.
+
+
+FROM python:3.8-slim
+2. LABEL
+Adds metadata to the image, such as author name or version information.
+
+
+LABEL maintainer="your-email@example.com"
+3. RUN
+Executes a command during the build process. Commonly used to install packages or run shell commands.
+
+
+RUN apt-get update && apt-get install -y <package_name>
+4. COPY
+Copies files or directories from the host machine to the Docker image.
+
+
+COPY . /app
+5. ADD
+Similar to COPY, but also supports downloading files from URLs and unpacking compressed files.
+
+
+ADD https://example.com/file.tar.gz /app/
+6. WORKDIR
+Sets the working directory for subsequent instructions.
+
+
+WORKDIR /app
+7. CMD
+Specifies the command to run when a container is started. Only one CMD instruction is allowed per Dockerfile.
+
+
+CMD ["python", "app.py"]
+8. ENTRYPOINT
+Configures a container to run as an executable. Unlike CMD, it cannot be overridden from the command line.
+
+
+ENTRYPOINT ["python", "app.py"]
+9. ENV
+Sets environment variables.
+
+
+ENV PYTHONUNBUFFERED=1
+10. EXPOSE
+Informs Docker that the container will listen on the specified network ports at runtime.
+
+
+EXPOSE 80
+11. VOLUME
+Creates a mount point with the specified path and marks it as holding externally mounted volumes from the host or other containers.
+
+
+VOLUME ["/data"]
+12. ARG
+Defines variables that users can pass at build-time to the builder.
+
+
+ARG build_version=1.0
+13. USER
+Sets the user name or UID to use when running the image.
+
+
+USER appuser
+Example Dockerfile
+Here's an example Dockerfile that uses many of these components to create a simple Python application:
+
+
+# Use an official Python runtime as a parent image
+FROM python:3.8-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 80 available to the world outside this container
+EXPOSE 80
+
+# Run app.py when the container launches
+CMD ["python", "app.py"]
